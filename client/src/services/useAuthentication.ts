@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { createContext } from '../utils/createContext';
 import { useCallback, useState } from 'react';
-import { BASE_URL, ENDPOINTS } from '../constants/endpoints';
+import { BASE_URL, ENDPOINTS } from '../endpoints/endpoints';
 
 type AuthenticationContext = {
   isAuthenticated: boolean;
   login(jwt: string): Promise<void>;
+  logout: () => Promise<void>;
   userEmail: string | null;
   validateSession: () => Promise<boolean>;
 };
@@ -65,6 +66,7 @@ export const [useAuthentication, AuthenticationProvider, authenticationContext] 
   return {
     isAuthenticated: Boolean(userEmail),
     login,
+    logout,
     userEmail,
     validateSession,
   };

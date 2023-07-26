@@ -4,6 +4,7 @@ import { ROUTES } from './ROUTES';
 import { Login } from '../views/login/Login';
 import { useAuthentication } from '../services/useAuthentication';
 import { AuthenticatedRoutes } from './AuthenticatedRoutes';
+import { Navigation } from '../components/Navigation';
 
 export const AppRoutes = () => {
   const { isAuthenticated } = useAuthentication();
@@ -18,5 +19,10 @@ export const AppRoutes = () => {
 
   const element = useRoutes(routes);
 
-  return element;
+  return (
+    <>
+      <Navigation />
+      {element}
+    </>
+  );
 };
