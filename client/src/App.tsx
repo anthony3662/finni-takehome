@@ -1,25 +1,27 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { unstable_HistoryRouter as Router } from 'react-router-dom';
+import { AppRoutes } from './routes';
+import { BrowserHistory } from 'history';
+import { ThemeProvider } from '@mui/material';
+import { DefaultTheme } from './theme/theme';
 
-function App() {
+function App({ history }: { history: BrowserHistory }) {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <ThemeProvider theme={DefaultTheme}>
+        <LocalizationProvider dateAdapter={AdapterMoment}>
+          {/*
+// @ts-ignore */}
+          <Router history={history}>
+            <AppRoutes />
+          </Router>
+        </LocalizationProvider>
+      </ThemeProvider>
+    </>
   );
 }
 
