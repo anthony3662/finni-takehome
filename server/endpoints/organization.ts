@@ -30,13 +30,43 @@ router.post('/create', async (req: CreateOrganizationParams, res: Response) => {
     address,
   });
 
-  const newOrgUser = await OrganizationUser.model.create({
+  await OrganizationUser.model.create({
     email,
     organizationId: newOrg._id,
     role: 'doctor',
   });
   res.json({
     newOrganization: newOrg,
+  });
+});
+
+router.get('/my-organizations', async (req: Request, res: Response) => {
+  const { email } = req.session;
+
+  const myOrgs = await OrganizationUser.model
+    .find({ email })
+    .populate('organizationId')
+    .exec();
+  res.json({
+    myOrganizations: myOrgs,
+  });
+});
+
+router.get('/details/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  if (!id) {
+    res.sendStatus(400);
+    return;
+  }
+
+  const org = await Organization.model.findById(id).exec();
+  const users = await OrganizationUser.model
+    .find({ organizationId: id })
+    .exec();
+
+  res.json({
+    organization: org,
+    users,
   });
 });
 

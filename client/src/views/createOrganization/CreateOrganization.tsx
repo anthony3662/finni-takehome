@@ -3,8 +3,10 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { LoadingButton } from '@mui/lab';
 import { TextField, Grid } from '@mui/material';
 import { useRequest } from '../../utils/useRequest';
+import { generatePath, useNavigate } from 'react-router-dom';
 import { CreateOrganizationParams, CreateOrganizationResponse } from '../../endpoints/endpointTypes';
 import { ENDPOINTS } from '../../endpoints/endpoints';
+import { ROUTES } from '../../routes/ROUTES';
 
 interface FormValues {
   organizationName: string;
@@ -41,6 +43,7 @@ const validateForm = (values: FormValues) => {
 };
 
 export const CreateOrganization = () => {
+  const navigate = useNavigate();
   const { post, isLoading } = useRequest<CreateOrganizationResponse, CreateOrganizationParams>();
   const handleSubmit = async (values: FormValues) => {
     const { organizationName, summaryOfServices, address } = values;
@@ -52,9 +55,9 @@ export const CreateOrganization = () => {
         address,
       },
     });
-
-    console.log(response.newOrganization);
-    // navigate to new org
+    if (response.newOrganization) {
+      navigate(generatePath(ROUTES.organization.detail, { id: response.newOrganization._id }));
+    }
   };
 
   return (
