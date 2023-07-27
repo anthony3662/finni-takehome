@@ -1,6 +1,7 @@
+import { Request, Response } from './types/expressTypes';
+
 require('dotenv').config();
 const mongoose = require('mongoose');
-import { Request, Response } from './types/expressTypes';
 const express = require('express');
 require('express-async-errors');
 const app = express();
@@ -9,9 +10,12 @@ const port = process.env.PORT || 3000;
 const { MONGO_USERNAME, MONGO_PASSWORD } = process.env;
 
 mongoose
-  .connect(`mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@cluster0.dbg8phn.mongodb.net/?retryWrites=true&w=majority`, {
-    useNewUrlParser: true,
-  })
+  .connect(
+    `mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@cluster0.dbg8phn.mongodb.net/?retryWrites=true&w=majority`,
+    {
+      useNewUrlParser: true,
+    }
+  )
   .then(async () => {
     console.log('mongo connected');
   })
@@ -31,11 +35,18 @@ app.use(expressSessionMiddleware);
 app.use(express.json());
 app.use(express.static('../build'));
 
-const identity = require('./endpoints/identity');
-app.use('/identity', identity);
+const identityRoutes = require('./endpoints/identity');
+app.use('/identity', identityRoutes);
 
-const organization = require('./endpoints/organization');
-app.use('/organization', organization);
+const organizationRoutes = require('./endpoints/organization');
+app.use('/organization', organizationRoutes);
+
+const patientRoutes = require('./endpoints/patient');
+app.use('/patient', patientRoutes);
+
+app.all('*', (req: Request, res: Response) => {
+  res.redirect('/');
+});
 
 app.use((err: any, req: Request, res: Response, next: any) => {
   // Handle the error in a graceful way

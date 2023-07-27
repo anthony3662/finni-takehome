@@ -1,4 +1,7 @@
-import { Role } from '../endpoints/organizationEndpointTypes';
+export enum Role {
+  doctor = 'doctor',
+  clerk = 'clerk',
+}
 
 export type OrganizationUser = {
   _id: string;

@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { DeleteMemberParams, DeleteMemberResponse, OrganizationDetailsResponse, Role } from '../../../endpoints/organizationEndpointTypes';
-import { Button, Card, CardActions, Typography } from '@mui/material';
+import { DeleteMemberParams, DeleteMemberResponse, OrganizationDetailsResponse } from '../../../endpoints/organizationEndpointTypes';
+import { Role } from '../../../models/organizationUser';
+import { Card, CardActions, Typography } from '@mui/material';
 import { useAuthentication } from '../../../services/useAuthentication';
 import { AddUser } from './AddUser';
 import { useRequest } from '../../../utils/useRequest';

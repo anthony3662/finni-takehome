@@ -13,7 +13,14 @@ export const ORGANIZATION_ENDPOINTS = {
   organizationDetails: `${BASE_URL}/organization/details`, // param id
   removeMember: `${BASE_URL}/organization/delete-member`,
 };
+
+export const PATIENT_ENDPOINTS = {
+  addPatient: `${BASE_URL}/patient/create`,
+  patientList: `${BASE_URL}/patient/list`, // param organizationId
+};
+
 export const ENDPOINTS = {
   ...IDENTITY_ENDPOINTS,
   ...ORGANIZATION_ENDPOINTS,
+  ...PATIENT_ENDPOINTS,
 };

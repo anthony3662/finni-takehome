@@ -9,6 +9,7 @@ import { Tab, Tabs, Typography } from '@mui/material';
 import { useWindowSize } from '@uidotdev/usehooks';
 import { MembersTab } from './members/MembersTab';
 import { Overview } from './overview/Overview';
+import { Patients } from './patients/Patients';
 
 export const OrganizationDetails = () => {
   const { width } = useWindowSize();
@@ -45,7 +46,7 @@ export const OrganizationDetails = () => {
       </Tabs>
       <div style={{ padding: 32 }}>
         {activeTab === 0 ? <Overview orgDetails={data} /> : null}
-        {activeTab === 1 ? <h2>Patients</h2> : null}
+        {activeTab === 1 ? <Patients orgDetails={data} /> : null}
         {activeTab === 2 ? <MembersTab orgDetails={data} refetch={fetch} /> : null}
       </div>
     </>

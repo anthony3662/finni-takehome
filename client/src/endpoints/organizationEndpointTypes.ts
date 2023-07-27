@@ -1,10 +1,6 @@
 import { Organization } from '../models/organization';
 import { OrganizationUser } from '../models/organizationUser';
-
-export enum Role {
-  doctor = 'doctor',
-  clerk = 'clerk',
-}
+import { Role } from '../models/organizationUser';
 
 export type CreateOrganizationParams = {
   name: string;

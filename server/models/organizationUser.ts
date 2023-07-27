@@ -20,6 +20,7 @@ const OrganizationUserSchema = new Schema<OrganizationUserDocument>({
   },
   role: {
     type: String,
+    enum: ['doctor', 'clerk'],
     required: true,
   },
 });
