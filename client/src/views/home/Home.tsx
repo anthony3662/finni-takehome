@@ -6,7 +6,7 @@ import { useRequest } from '../../utils/useRequest';
 import { LoadingBackdrop } from '../../components/LoadingBackdrop';
 import { useEffect } from 'react';
 import { ENDPOINTS } from '../../endpoints/endpoints';
-import { MyOrganizationsResponse } from '../../endpoints/endpointTypes';
+import { MyOrganizationsResponse } from '../../endpoints/organizationEndpointTypes';
 import styled from 'styled-components';
 import { useAuthentication } from '../../services/useAuthentication';
 

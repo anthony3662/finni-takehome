@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createContext } from '../utils/createContext';
 import { useCallback, useState } from 'react';
-import { BASE_URL, ENDPOINTS } from '../endpoints/endpoints';
+import { BASE_URL, ENDPOINTS, IDENTITY_ENDPOINTS } from '../endpoints/endpoints';
 
 type AuthenticationContext = {
   isAuthenticated: boolean;
@@ -15,7 +15,7 @@ export const [useAuthentication, AuthenticationProvider, authenticationContext] 
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   const validateSession: () => Promise<boolean> = useCallback(async () => {
-    const res = await fetch(ENDPOINTS.validateSession, {
+    const res = await fetch(IDENTITY_ENDPOINTS.validateSession, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -32,7 +32,7 @@ export const [useAuthentication, AuthenticationProvider, authenticationContext] 
   }, []);
 
   const login = useCallback(async (jwt: string) => {
-    await fetch(ENDPOINTS.googleSignIn, {
+    await fetch(IDENTITY_ENDPOINTS.googleSignIn, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -51,7 +51,7 @@ export const [useAuthentication, AuthenticationProvider, authenticationContext] 
   }, []);
 
   const logout = useCallback(async () => {
-    await fetch(ENDPOINTS.logout, {
+    await fetch(IDENTITY_ENDPOINTS.logout, {
       method: 'GET',
       headers: {
         Accept: 'application/json',

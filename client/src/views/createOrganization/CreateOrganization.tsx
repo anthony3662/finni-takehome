@@ -4,8 +4,8 @@ import { LoadingButton } from '@mui/lab';
 import { TextField, Grid } from '@mui/material';
 import { useRequest } from '../../utils/useRequest';
 import { generatePath, useNavigate } from 'react-router-dom';
-import { CreateOrganizationParams, CreateOrganizationResponse } from '../../endpoints/endpointTypes';
-import { ENDPOINTS } from '../../endpoints/endpoints';
+import { CreateOrganizationParams, CreateOrganizationResponse } from '../../endpoints/organizationEndpointTypes';
+import { ENDPOINTS, ORGANIZATION_ENDPOINTS } from '../../endpoints/endpoints';
 import { ROUTES } from '../../routes/ROUTES';
 
 interface FormValues {
@@ -48,7 +48,7 @@ export const CreateOrganization = () => {
   const handleSubmit = async (values: FormValues) => {
     const { organizationName, summaryOfServices, address } = values;
     const response = await post({
-      endpoint: ENDPOINTS.createOrganization,
+      endpoint: ORGANIZATION_ENDPOINTS.createOrganization,
       body: {
         name: organizationName,
         description: summaryOfServices,

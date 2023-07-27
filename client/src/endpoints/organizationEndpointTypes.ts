@@ -1,6 +1,10 @@
 import { Organization } from '../models/organization';
+import { OrganizationUser } from '../models/organizationUser';
 
-export type Role = 'doctor' | 'clerk';
+export enum Role {
+  doctor = 'doctor',
+  clerk = 'clerk',
+}
 
 export type CreateOrganizationParams = {
   name: string;
@@ -23,10 +27,29 @@ export type MyOrganizationsResponse = {
 
 export type OrganizationDetailsResponse = {
   organization: Organization;
-  users: {
+  users: OrganizationUser[];
+  myOrgUser: OrganizationUser;
+};
+
+export type AddMemberParams = {
+  email: string;
+  role: Role;
+  organizationId: string;
+};
+
+export type AddMemberResponse = {
+  newOrgUser: {
     _id: string;
     email: string;
     organizationId: string;
     role: Role;
-  }[];
+  };
+};
+
+export type DeleteMemberParams = {
+  orgUserId: string;
+};
+
+export type DeleteMemberResponse = {
+  success: boolean;
 };

@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export type Role = 'doctor' | 'clerk';
 export interface OrganizationUserDocument extends Document {
   email: string;
   organizationId: mongoose.Types.ObjectId;
-  role: 'doctor' | 'clerk';
+  role: Role;
 }
 
 const OrganizationUserSchema = new Schema<OrganizationUserDocument>({
