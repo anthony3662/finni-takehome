@@ -6,6 +6,7 @@ import {
   AppBar,
   Button,
   Card,
+  CardActions,
   CardContent,
   Dialog,
   DialogActions,
@@ -24,6 +25,8 @@ import { useRequest } from '../../../utils/useRequest';
 import { PatientListParams, PatientListResponse } from '../../../endpoints/patientEndpointTypes';
 import { PATIENT_ENDPOINTS } from '../../../endpoints/endpoints';
 import { LoadingBackdrop } from '../../../components/LoadingBackdrop';
+import { Patient } from '../../../models/patient';
+import { PatientsList } from './PatientsList';
 
 const Wrapper = styled.div`
   display: flex;
@@ -37,7 +40,9 @@ const DialogTitleWrapper = styled(Toolbar)`
 `;
 
 export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = ({ orgDetails }) => {
-  const [openAddPatient, setOpenAddPatient] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [patientToEdit, setPatientToEdit] = useState<Patient | null>(null); // Add state for the patient to edit
 
   const { post: fetchPatients, isLoading, data } = useRequest<PatientListResponse, PatientListParams>();
 
@@ -53,12 +58,19 @@ export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = (
     fetch();
   }, []);
 
-  const handleOpenDialog = () => {
-    setOpenAddPatient(true);
+  const handleOpenAddDialog = () => {
+    setIsAddOpen(true);
   };
 
   const handleCloseDialog = () => {
-    setOpenAddPatient(false);
+    setIsAddOpen(false);
+    setIsEditOpen(false); // Close the edit dialog as well
+    setPatientToEdit(null); // Reset the patient to edit
+  };
+
+  const handleEditPatient = (patient: Patient) => {
+    setPatientToEdit(patient); // Set the patient to edit when the edit button is clicked
+    setIsEditOpen(true); // Open the edit dialog
   };
 
   const isDoctor = orgDetails.myOrgUser.role === Role.doctor;
@@ -70,11 +82,12 @@ export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = (
   return (
     <Wrapper>
       {isDoctor ? (
-        <Button variant={'contained'} fullWidth onClick={handleOpenDialog}>
+        <Button variant={'contained'} fullWidth onClick={handleOpenAddDialog}>
           Add Patient
         </Button>
       ) : null}
-      <Dialog open={openAddPatient} onClose={handleCloseDialog} fullScreen>
+      <PatientsList patients={data.patients} isDoctor={isDoctor} handleEditPatient={handleEditPatient} />
+      <Dialog open={isAddOpen} onClose={handleCloseDialog} fullScreen>
         <AppBar sx={{ position: 'relative' }}>
           <DialogTitleWrapper>
             <Typography variant='h6'>Add New Patient</Typography>
@@ -98,36 +111,33 @@ export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = (
           </Button>
         </DialogActions>
       </Dialog>
-      {data.patients.map(patient => (
-        <Card key={patient._id} variant='outlined' style={{ marginBottom: '20px' }}>
-          <CardContent>
-            <Typography variant='h5' gutterBottom>
-              {`${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`}
-            </Typography>
-            <Typography variant='body1' gutterBottom>
-              Status: {patient.status}
-            </Typography>
-            <Typography variant='body1' gutterBottom>
-              Organization ID: {patient.organizationId}
-            </Typography>
-
-            {patient.addresses.length > 0 && (
-              <>
-                <Typography variant='h6' gutterBottom>
-                  Addresses:
-                </Typography>
-                <List>
-                  {patient.addresses.map((address, index) => (
-                    <ListItem key={index}>
-                      <ListItemText primary={address.street} secondary={`${address.city}, ${address.state} ${address.zipCode}`} />
-                    </ListItem>
-                  ))}
-                </List>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+      <Dialog open={isEditOpen} onClose={handleCloseDialog} fullScreen>
+        <AppBar sx={{ position: 'relative' }}>
+          <DialogTitleWrapper>
+            <Typography variant='h6'>Edit Patient</Typography>
+            <IconButton edge='end' color='inherit' onClick={handleCloseDialog} aria-label='close'>
+              <CloseIcon />
+            </IconButton>
+          </DialogTitleWrapper>
+        </AppBar>
+        <DialogContent>
+          {patientToEdit ? (
+            <PatientForm
+              orgDetails={orgDetails}
+              patientToEdit={patientToEdit} // Pass the patient to edit to the form
+              onSubmit={async () => {
+                await fetch();
+                handleCloseDialog();
+              }}
+            />
+          ) : null}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color='primary'>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Wrapper>
   );
 };

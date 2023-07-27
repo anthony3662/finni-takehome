@@ -15,7 +15,7 @@ export const ORGANIZATION_ENDPOINTS = {
 };
 
 export const PATIENT_ENDPOINTS = {
-  addPatient: `${BASE_URL}/patient/create`,
+  upsertPatient: `${BASE_URL}/patient/upsert`,
   patientList: `${BASE_URL}/patient/list`, // param organizationId
 };
 

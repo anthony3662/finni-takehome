@@ -5,7 +5,7 @@ import { DatePicker } from '@mui/x-date-pickers';
 import { Button, Container, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import * as yup from 'yup';
 import moment from 'moment';
-import type { Address } from '../../../models/patient';
+import type { Address, Patient } from '../../../models/patient';
 import { useRequest } from '../../../utils/useRequest';
 import { CreatePatientParams, CreatePatientResponse } from '../../../endpoints/patientEndpointTypes';
 import { PatientStatus } from '../../../models/patient';
@@ -29,29 +29,32 @@ const validationSchema = yup.object({
 });
 
 interface PatientFormValues {
+  _id?: string;
   firstName: string;
-  middleName: string;
+  middleName: string | null;
   lastName: string;
   dateOfBirth: Date | null;
   status: PatientStatus | '';
   addresses: Address[];
 }
 
-const initialValues: PatientFormValues = {
-  firstName: '',
-  middleName: '',
-  lastName: '',
-  dateOfBirth: null,
-  status: '',
-  addresses: [], // Initial empty array for addresses
-};
-
-export const PatientForm: React.FC<{ orgDetails: OrganizationDetailsResponse; onSubmit: () => any }> = ({ orgDetails, onSubmit }) => {
+type Props = { orgDetails: OrganizationDetailsResponse; onSubmit: () => any; patientToEdit?: Patient };
+export const PatientForm: React.FC<Props> = ({ orgDetails, onSubmit, patientToEdit }) => {
   const { post, isLoading } = useRequest<CreatePatientResponse, CreatePatientParams>();
+
+  const initialValues: PatientFormValues = patientToEdit || {
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    dateOfBirth: null,
+    status: '',
+    addresses: [], // Initial empty array for addresses
+  };
+
   const handleSubmit = async (values: PatientFormValues) => {
     const { firstName, middleName, lastName, dateOfBirth, status, addresses } = values;
     await post({
-      endpoint: PATIENT_ENDPOINTS.addPatient,
+      endpoint: PATIENT_ENDPOINTS.upsertPatient,
       body: {
         patient: {
           firstName,
@@ -61,6 +64,7 @@ export const PatientForm: React.FC<{ orgDetails: OrganizationDetailsResponse; on
           organizationId: orgDetails.organization._id,
           status: status as PatientStatus,
           addresses,
+          ...(patientToEdit ? { _id: patientToEdit._id } : {}),
         },
       },
     });
@@ -119,7 +123,7 @@ export const PatientForm: React.FC<{ orgDetails: OrganizationDetailsResponse; on
               {({ push, remove, form }: any) => (
                 <>
                   {form.values.addresses.map((address: Address, index: number) => (
-                    <div key={index}>
+                    <div key={index} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                       <Field component={TextField} name={`addresses[${index}].street`} label='Street' fullWidth />
                       <ErrorMessage name={`addresses[${index}].street`} />
 
