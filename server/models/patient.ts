@@ -8,6 +8,10 @@ export type Filters = {
   lastName?: string;
   dateOfBirth?: Date;
   zipCode?: string;
+  customField?: {
+    name: string;
+    value: string;
+  };
 };
 
 export interface AddressDocument extends Document {

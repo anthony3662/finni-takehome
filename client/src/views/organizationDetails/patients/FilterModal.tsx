@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AppBar, Button, Dialog, DialogContent, IconButton, Toolbar, Typography } from '@mui/material';
+import { AppBar, Button, Dialog, DialogContent, Divider, IconButton, Toolbar, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Formik, Form, Field } from 'formik';
 import { TextField } from 'formik-material-ui';
@@ -18,18 +18,34 @@ type FormValues = {
   lastName: string;
   dateOfBirth: Date | null;
   zipCode: string;
+  customFieldName: string;
+  customFieldValue: string;
 };
 export const FilterModal: React.FC<Props> = ({ isOpen, close, activeFilters, setFilters }) => {
   const initialValues: FormValues = {
     lastName: activeFilters.lastName || '',
     dateOfBirth: activeFilters.dateOfBirth || null,
     zipCode: activeFilters.zipCode || '',
+    customFieldName: activeFilters.customField?.name || '',
+    customFieldValue: activeFilters.customField?.value || '',
   };
 
   const handleSubmit = (values: FormValues) => {
+    const { lastName, dateOfBirth, zipCode } = values;
     // Filter out falsy properties (e.g., empty strings, null, undefined, etc.)
-    const filteredValues = Object.fromEntries(Object.entries(values).filter(([_, v]) => !!v));
-    setFilters(filteredValues);
+    const filteredBasicValues = Object.fromEntries(Object.entries({ lastName, dateOfBirth, zipCode }).filter(([_, v]) => !!v));
+
+    const newFilters: Filters = {
+      ...filteredBasicValues,
+    };
+    // validation ensures both are truthy
+    if (values.customFieldName) {
+      newFilters.customField = {
+        name: values.customFieldName,
+        value: values.customFieldValue,
+      };
+    }
+    setFilters(newFilters);
     close();
   };
 
@@ -50,36 +66,54 @@ export const FilterModal: React.FC<Props> = ({ isOpen, close, activeFilters, set
       </AppBar>
       <DialogContent>
         <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-          <Form
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 24,
-            }}>
-            <Field component={TextField} name='lastName' label='Last Name' fullWidth variant='outlined' margin='normal' />
+          {({ values }) => (
+            <Form
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 24,
+              }}>
+              <Field component={TextField} name='lastName' label='Last Name' fullWidth variant='outlined' margin='normal' />
 
-            <Field name='dateOfBirth'>
-              {({ field, form }: any) => (
-                <DatePicker
-                  {...field}
-                  label='Date of Birth'
-                  value={field.value ? moment(field.value) : null}
-                  disableFuture
-                  onChange={(v: any) => form.setFieldValue('dateOfBirth', v ? v._d : null)}
-                />
-              )}
-            </Field>
+              <Field name='dateOfBirth'>
+                {({ field, form }: any) => (
+                  <DatePicker
+                    {...field}
+                    label='Date of Birth'
+                    value={field.value ? moment(field.value) : null}
+                    disableFuture
+                    onChange={(v: any) => form.setFieldValue('dateOfBirth', v ? v._d : null)}
+                  />
+                )}
+              </Field>
 
-            <Field component={TextField} name='zipCode' label='ZIP Code' fullWidth variant='outlined' margin='normal' />
+              <Field component={TextField} name='zipCode' label='ZIP Code' fullWidth variant='outlined' margin='normal' />
 
-            <Button type='submit' variant='contained' color='primary'>
-              Apply Filters
-            </Button>
+              <Divider variant={'middle'} />
+              <Field component={TextField} name='customFieldName' label='Custom Field Name' fullWidth variant='outlined' margin='normal' />
+              <Field
+                component={TextField}
+                name='customFieldValue'
+                label='Custom Field Value'
+                fullWidth
+                variant='outlined'
+                margin='normal'
+              />
 
-            <Button variant={'contained'} color={'error'} onClick={handleClear}>
-              Clear Filters
-            </Button>
-          </Form>
+              <Button
+                type='submit'
+                variant='contained'
+                color='primary'
+                // valid if neither or both filled
+                disabled={Boolean(values.customFieldName) !== Boolean(values.customFieldValue)}>
+                Apply Filters
+              </Button>
+
+              <Button variant={'contained'} color={'error'} onClick={handleClear}>
+                Clear Filters
+              </Button>
+            </Form>
+          )}
         </Formik>
       </DialogContent>
     </Dialog>

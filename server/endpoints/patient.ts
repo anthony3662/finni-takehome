@@ -94,7 +94,10 @@ router.post(
 
     // Apply filters to the query
     if (filters.lastName) {
-      query = query.where('lastName', filters.lastName);
+      // case insensitive
+      query = query.where('lastName', {
+        $regex: new RegExp(filters.lastName, 'i'),
+      });
     }
 
     if (filters.dateOfBirth) {
@@ -102,8 +105,16 @@ router.post(
     }
 
     if (filters.zipCode) {
-      // Assuming the zipCode field is in the addresses subdocument
       query = query.where('addresses.zipCode', filters.zipCode);
+    }
+
+    if (filters.customField) {
+      const { name, value } = filters.customField;
+      const customFieldFilter = {
+        name: { $regex: new RegExp(name, 'i') }, // Case-insensitive
+        value: { $regex: new RegExp(value, 'i') },
+      };
+      query = query.where('customFields').elemMatch(customFieldFilter);
     }
 
     // Execute the query to get the filtered patients

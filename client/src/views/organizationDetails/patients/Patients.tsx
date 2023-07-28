@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { OrganizationDetailsResponse } from '../../../endpoints/organizationEndpointTypes';
 import styled from 'styled-components';
-import { AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar, Typography } from '@mui/material';
+import { AppBar, Button, Dialog, DialogContent, IconButton, Toolbar, Typography } from '@mui/material';
 import { PatientForm } from './PatientForm';
 import CloseIcon from '@mui/icons-material/Close';
 import { Role } from '../../../models/organizationUser';
@@ -30,6 +30,10 @@ export type Filters = {
   lastName?: string;
   dateOfBirth?: Date;
   zipCode?: string;
+  customField?: {
+    name: string;
+    value: string;
+  };
 };
 
 export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = ({ orgDetails }) => {
@@ -53,8 +57,8 @@ export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = (
   };
 
   useEffect(() => {
+    // backend does the filtering
     fetch();
-    console.log(activeFilters);
   }, [activeFilters]);
 
   useEffect(() => {}, []);
