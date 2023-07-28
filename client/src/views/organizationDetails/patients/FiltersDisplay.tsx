@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Filters } from './Patients';
 import { Button, Card, Typography } from '@mui/material';
+import { Filters } from '../../../models/patient';
 
 export const FiltersDisplay: React.FC<{ activeFilters: Filters; clearFilters: () => void }> = ({ activeFilters, clearFilters }) => {
   const { lastName, dateOfBirth, zipCode, customField } = activeFilters;

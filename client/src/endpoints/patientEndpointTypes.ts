@@ -1,5 +1,4 @@
-import { Patient } from '../models/patient';
-import { Filters } from '../views/organizationDetails/patients/Patients';
+import { Filters, Patient } from '../models/patient';
 
 export type CreatePatientParams = {
   patient: Omit<Patient, '_id'>;

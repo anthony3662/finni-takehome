@@ -5,7 +5,8 @@ import { Formik, Form, Field } from 'formik';
 import { TextField } from 'formik-material-ui';
 import { DatePicker } from '@mui/x-date-pickers';
 import moment from 'moment/moment';
-import { Filters } from './Patients';
+
+import { Filters } from '../../../models/patient';
 
 type Props = {
   isOpen: boolean;

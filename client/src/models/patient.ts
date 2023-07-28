@@ -26,3 +26,12 @@ export type Patient = {
   addresses: Address[];
   customFields: CustomField[];
 };
+export type Filters = {
+  lastName?: string;
+  dateOfBirth?: Date;
+  zipCode?: string;
+  customField?: {
+    name: string;
+    value: string;
+  };
+};

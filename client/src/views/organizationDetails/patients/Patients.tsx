@@ -10,7 +10,7 @@ import { useRequest } from '../../../utils/useRequest';
 import { PatientListParams, PatientListResponse } from '../../../endpoints/patientEndpointTypes';
 import { PATIENT_ENDPOINTS } from '../../../endpoints/endpoints';
 import { LoadingBackdrop } from '../../../components/LoadingBackdrop';
-import { Patient } from '../../../models/patient';
+import { Filters, Patient } from '../../../models/patient';
 import { PatientsList } from './PatientsList';
 import { FilterModal } from './FilterModal';
 import { FiltersDisplay } from './FiltersDisplay';
@@ -25,16 +25,6 @@ const DialogTitleWrapper = styled(Toolbar)`
   display: flex;
   justify-content: space-between;
 `;
-
-export type Filters = {
-  lastName?: string;
-  dateOfBirth?: Date;
-  zipCode?: string;
-  customField?: {
-    name: string;
-    value: string;
-  };
-};
 
 export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = ({ orgDetails }) => {
   const [isAddOpen, setIsAddOpen] = useState(false);
