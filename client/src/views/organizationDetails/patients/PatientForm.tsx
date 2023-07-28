@@ -88,7 +88,7 @@ export const PatientForm: React.FC<Props> = ({ orgDetails, onSubmit, patientToEd
         New Patient Form
       </Typography>
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-        {({ isSubmitting, isValid }) => (
+        {({ isValid }) => (
           <Form
             style={{
               display: 'flex',

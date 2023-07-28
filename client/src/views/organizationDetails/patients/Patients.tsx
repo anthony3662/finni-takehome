@@ -12,6 +12,8 @@ import { PATIENT_ENDPOINTS } from '../../../endpoints/endpoints';
 import { LoadingBackdrop } from '../../../components/LoadingBackdrop';
 import { Patient } from '../../../models/patient';
 import { PatientsList } from './PatientsList';
+import { FilterModal } from './FilterModal';
+import { FiltersDisplay } from './FiltersDisplay';
 
 const Wrapper = styled.div`
   display: flex;
@@ -24,24 +26,38 @@ const DialogTitleWrapper = styled(Toolbar)`
   justify-content: space-between;
 `;
 
+export type Filters = {
+  lastName?: string;
+  dateOfBirth?: Date;
+  zipCode?: string;
+};
+
 export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = ({ orgDetails }) => {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [patientToEdit, setPatientToEdit] = useState<Patient | null>(null); // Add state for the patient to edit
+
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const [activeFilters, setActiveFilters] = useState<Filters>({});
 
   const { post: fetchPatients, isLoading, data } = useRequest<PatientListResponse, PatientListParams>();
 
   const fetch = async () => {
     const res = await fetchPatients({
       endpoint: `${PATIENT_ENDPOINTS.patientList}/${orgDetails.organization._id}`,
-      body: {},
+      body: {
+        filters: activeFilters,
+      },
     });
-    console.log(res);
   };
 
   useEffect(() => {
     fetch();
-  }, []);
+    console.log(activeFilters);
+  }, [activeFilters]);
+
+  useEffect(() => {}, []);
 
   const handleOpenAddDialog = () => {
     setIsAddOpen(true);
@@ -67,11 +83,16 @@ export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = (
   return (
     <Wrapper>
       {isDoctor ? (
-        <Button variant={'contained'} fullWidth onClick={handleOpenAddDialog}>
+        <Button variant={'contained'} color={'success'} fullWidth onClick={handleOpenAddDialog}>
           Add Patient
         </Button>
       ) : null}
+      <Button variant={'contained'} onClick={() => setIsFilterOpen(true)}>
+        Add Filters
+      </Button>
+      <FiltersDisplay activeFilters={activeFilters} clearFilters={() => setActiveFilters({})} />
       <PatientsList patients={data.patients} isDoctor={isDoctor} handleEditPatient={handleEditPatient} refetch={fetch} />
+      <FilterModal isOpen={isFilterOpen} close={() => setIsFilterOpen(false)} activeFilters={activeFilters} setFilters={setActiveFilters} />
       <Dialog open={isAddOpen} onClose={handleCloseDialog} fullScreen>
         <AppBar sx={{ position: 'relative' }}>
           <DialogTitleWrapper>
@@ -90,11 +111,6 @@ export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = (
             }}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color='primary'>
-            Cancel
-          </Button>
-        </DialogActions>
       </Dialog>
       <Dialog open={isEditOpen} onClose={handleCloseDialog} fullScreen>
         <AppBar sx={{ position: 'relative' }}>
@@ -117,11 +133,6 @@ export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = (
             />
           ) : null}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color='primary'>
-            Cancel
-          </Button>
-        </DialogActions>
       </Dialog>
     </Wrapper>
   );

@@ -4,6 +4,12 @@ const { schema: CustomFieldSchema } = require('./customField');
 
 export type PatientStatus = 'inquiry' | 'onboarding' | 'active' | 'churned';
 
+export type Filters = {
+  lastName?: string;
+  dateOfBirth?: Date;
+  zipCode?: string;
+};
+
 export interface AddressDocument extends Document {
   street: string;
   city: string;

@@ -1,5 +1,6 @@
 import { Request, Response } from '../types/expressTypes';
-import { OrganizationUserDocument, Role } from '../models/organizationUser';
+import { OrganizationUserDocument } from '../models/organizationUser';
+import type { Filters } from '../models/patient';
 import { PatientDocument } from '../models/patient';
 import { CustomField } from '../models/customField';
 
@@ -61,42 +62,67 @@ router.post('/upsert', async (req: CreatePatientParams, res: Response) => {
   });
 });
 
-router.post('/list/:organizationId', async (req: Request, res: Response) => {
-  const { organizationId } = req.params;
-  const { email } = req.session;
+interface PatientListParams extends Request {
+  body: {
+    filters: Filters;
+  };
+}
 
-  if (!organizationId) {
-    res.sendStatus(400);
-    return;
-  }
+router.post(
+  '/list/:organizationId',
+  async (req: PatientListParams, res: Response) => {
+    const { organizationId } = req.params;
+    const { email } = req.session;
+    const filters = req.body.filters || {};
 
-  const myOrgUser: OrganizationUserDocument = await OrganizationUser.model
-    .findOne({ email, organizationId })
-    .exec();
+    if (!organizationId) {
+      res.sendStatus(400);
+      return;
+    }
 
-  if (!myOrgUser) {
-    // user not authorized to view
-    res.sendStatus(403);
-    return;
-  }
+    const myOrgUser: OrganizationUserDocument = await OrganizationUser.model
+      .findOne({ email, organizationId })
+      .exec();
 
-  const patients: PatientDocument[] = await Patient.model
-    .find({ organizationId })
-    .exec();
+    if (!myOrgUser) {
+      // user not authorized to view
+      res.sendStatus(403);
+      return;
+    }
 
-  if (myOrgUser.role !== 'doctor') {
-    // Filter out CustomField subdocuments user not allowed to see
-    patients.forEach((patient) => {
-      patient.customFields = patient.customFields.filter(
-        (field) => field.viewPermission === 'all'
-      );
+    let query = Patient.model.find({ organizationId });
+
+    // Apply filters to the query
+    if (filters.lastName) {
+      query = query.where('lastName', filters.lastName);
+    }
+
+    if (filters.dateOfBirth) {
+      query = query.where('dateOfBirth', filters.dateOfBirth);
+    }
+
+    if (filters.zipCode) {
+      // Assuming the zipCode field is in the addresses subdocument
+      query = query.where('addresses.zipCode', filters.zipCode);
+    }
+
+    // Execute the query to get the filtered patients
+    const patients: PatientDocument[] = await query.exec();
+
+    if (myOrgUser.role !== 'doctor') {
+      // Filter out CustomField subdocuments user not allowed to see
+      patients.forEach((patient) => {
+        patient.customFields = patient.customFields.filter(
+          (field) => field.viewPermission === 'all'
+        );
+      });
+    }
+
+    res.json({
+      patients,
     });
   }
-
-  res.json({
-    patients,
-  });
-});
+);
 
 router.get('/delete/:patientId', async (req: Request, res: Response) => {
   const { email } = req.session;
