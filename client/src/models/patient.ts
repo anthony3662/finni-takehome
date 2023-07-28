@@ -1,3 +1,5 @@
+import { CustomField } from './customField';
+
 export enum PatientStatus {
   inquiry = 'inquiry',
   onboarding = 'onboarding',
@@ -22,4 +24,5 @@ export type Patient = {
   organizationId: string;
   status: PatientStatus;
   addresses: Address[];
+  customFields: CustomField[];
 };

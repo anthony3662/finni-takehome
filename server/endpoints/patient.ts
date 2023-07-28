@@ -1,6 +1,7 @@
 import { Request, Response } from '../types/expressTypes';
 import { OrganizationUserDocument, Role } from '../models/organizationUser';
 import { PatientDocument } from '../models/patient';
+import { CustomField } from '../models/customField';
 
 const express = require('express');
 const router = express.Router();
@@ -14,10 +15,13 @@ router.use(cookieCheckMiddleware);
 
 interface CreatePatientParams extends Request {
   body: {
-    patient: PatientDocument;
+    patient: Omit<PatientDocument, 'customFields'> & {
+      customFields: CustomField[];
+    };
   };
 }
-router.post('/create', async (req: CreatePatientParams, res: Response) => {
+// edits if _id field included, otherwise inserts.
+router.post('/upsert', async (req: CreatePatientParams, res: Response) => {
   const { email: initiatingEmail } = req.session;
   const { patient } = req.body;
 
@@ -37,6 +41,19 @@ router.post('/create', async (req: CreatePatientParams, res: Response) => {
     return;
   }
 
+  if (patient._id) {
+    // editing existing
+    const patientWithoutId = { ...patient };
+    delete patientWithoutId._id;
+    const newPatient = await Patient.model
+      .findByIdAndUpdate(patient._id, patientWithoutId)
+      .exec();
+    res.json({
+      newPatient,
+    });
+    return;
+  }
+
   const newPatient = await Patient.model.create(patient);
 
   res.json({
@@ -53,7 +70,7 @@ router.post('/list/:organizationId', async (req: Request, res: Response) => {
     return;
   }
 
-  const myOrgUser = await OrganizationUser.model
+  const myOrgUser: OrganizationUserDocument = await OrganizationUser.model
     .findOne({ email, organizationId })
     .exec();
 
@@ -63,11 +80,48 @@ router.post('/list/:organizationId', async (req: Request, res: Response) => {
     return;
   }
 
-  const patients = await Patient.model.find({ organizationId }).exec();
+  const patients: PatientDocument[] = await Patient.model
+    .find({ organizationId })
+    .exec();
+
+  if (myOrgUser.role !== 'doctor') {
+    // Filter out CustomField subdocuments user not allowed to see
+    patients.forEach((patient) => {
+      patient.customFields = patient.customFields.filter(
+        (field) => field.viewPermission === 'all'
+      );
+    });
+  }
 
   res.json({
     patients,
   });
+});
+
+router.get('/delete/:patientId', async (req: Request, res: Response) => {
+  const { email } = req.session;
+  const { patientId } = req.params;
+  const patientToDelete: PatientDocument = await Patient.model
+    .findById(patientId)
+    .exec();
+
+  if (!patientToDelete) {
+    res.sendStatus(409);
+    return;
+  }
+
+  const myOrgUser = await OrganizationUser.model
+    .findOne({ email, organizationId: patientToDelete.organizationId })
+    .exec();
+
+  if (!myOrgUser || myOrgUser.role !== 'doctor') {
+    // user not authorized to perform operation
+    res.sendStatus(403);
+    return;
+  }
+
+  await Patient.model.findByIdAndDelete(patientId).exec();
+  res.json({ success: true });
 });
 
 module.exports = router;

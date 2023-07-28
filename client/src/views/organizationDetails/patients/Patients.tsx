@@ -2,22 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { OrganizationDetailsResponse } from '../../../endpoints/organizationEndpointTypes';
 import styled from 'styled-components';
-import {
-  AppBar,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Toolbar,
-  Typography,
-} from '@mui/material';
+import { AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar, Typography } from '@mui/material';
 import { PatientForm } from './PatientForm';
 import CloseIcon from '@mui/icons-material/Close';
 import { Role } from '../../../models/organizationUser';
@@ -86,7 +71,7 @@ export const Patients: React.FC<{ orgDetails: OrganizationDetailsResponse }> = (
           Add Patient
         </Button>
       ) : null}
-      <PatientsList patients={data.patients} isDoctor={isDoctor} handleEditPatient={handleEditPatient} />
+      <PatientsList patients={data.patients} isDoctor={isDoctor} handleEditPatient={handleEditPatient} refetch={fetch} />
       <Dialog open={isAddOpen} onClose={handleCloseDialog} fullScreen>
         <AppBar sx={{ position: 'relative' }}>
           <DialogTitleWrapper>

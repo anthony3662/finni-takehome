@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { CustomField } from './customField';
+const { schema: CustomFieldSchema } = require('./customField');
 
 export type PatientStatus = 'inquiry' | 'onboarding' | 'active' | 'churned';
 
@@ -13,9 +15,11 @@ export interface PatientDocument extends Document {
   firstName: string;
   middleName?: string | null;
   lastName: string;
+  dateOfBirth: Date;
   organizationId: mongoose.Types.ObjectId;
   status: PatientStatus;
   addresses: AddressDocument[];
+  customFields: CustomField[];
 }
 
 const addressSchema = new Schema<AddressDocument>({
@@ -52,6 +56,10 @@ const PatientSchema = new Schema<PatientDocument>({
     required: true,
     index: true,
   },
+  dateOfBirth: {
+    type: Date,
+    required: true,
+  },
   organizationId: {
     type: Schema.Types.ObjectId,
     ref: 'Organization',
@@ -68,6 +76,7 @@ const PatientSchema = new Schema<PatientDocument>({
     required: true,
     default: [],
   },
+  customFields: [CustomFieldSchema],
 });
 
 const Patient = mongoose.model('Patient', PatientSchema);

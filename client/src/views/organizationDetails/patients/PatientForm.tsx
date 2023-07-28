@@ -12,6 +12,7 @@ import { PatientStatus } from '../../../models/patient';
 import { PATIENT_ENDPOINTS } from '../../../endpoints/endpoints';
 import { OrganizationDetailsResponse } from '../../../endpoints/organizationEndpointTypes';
 import { LoadingButton } from '@mui/lab';
+import { CustomField, FieldPermission } from '../../../models/customField';
 
 const validationSchema = yup.object({
   firstName: yup.string().required('First Name is required'),
@@ -26,6 +27,13 @@ const validationSchema = yup.object({
       zipCode: yup.string().required('ZIP is required'),
     }),
   ),
+  customFields: yup.array().of(
+    yup.object().shape({
+      name: yup.string().required('Name is required'),
+      value: yup.string().required('Value is required'),
+      viewPermission: yup.string().required('Permission is required'),
+    }),
+  ),
 });
 
 interface PatientFormValues {
@@ -36,6 +44,7 @@ interface PatientFormValues {
   dateOfBirth: Date | null;
   status: PatientStatus | '';
   addresses: Address[];
+  customFields: CustomField[];
 }
 
 type Props = { orgDetails: OrganizationDetailsResponse; onSubmit: () => any; patientToEdit?: Patient };
@@ -48,11 +57,12 @@ export const PatientForm: React.FC<Props> = ({ orgDetails, onSubmit, patientToEd
     lastName: '',
     dateOfBirth: null,
     status: '',
-    addresses: [], // Initial empty array for addresses
+    addresses: [], // Initial empty array for addresses,
+    customFields: [],
   };
 
   const handleSubmit = async (values: PatientFormValues) => {
-    const { firstName, middleName, lastName, dateOfBirth, status, addresses } = values;
+    const { firstName, middleName, lastName, dateOfBirth, status, addresses, customFields } = values;
     await post({
       endpoint: PATIENT_ENDPOINTS.upsertPatient,
       body: {
@@ -64,6 +74,7 @@ export const PatientForm: React.FC<Props> = ({ orgDetails, onSubmit, patientToEd
           organizationId: orgDetails.organization._id,
           status: status as PatientStatus,
           addresses,
+          customFields,
           ...(patientToEdit ? { _id: patientToEdit._id } : {}),
         },
       },
@@ -143,6 +154,41 @@ export const PatientForm: React.FC<Props> = ({ orgDetails, onSubmit, patientToEd
                   ))}
                   <Button color='primary' onClick={() => push({ street: '', city: '', state: '', zip: '' })}>
                     Add Address
+                  </Button>
+                </>
+              )}
+            </FieldArray>
+
+            <FieldArray name='customFields'>
+              {({ push, remove, form }: any) => (
+                <>
+                  {form.values.customFields.map((customField: CustomField, index: number) => (
+                    <div key={index} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                      <Field component={TextField} name={`customFields[${index}].name`} label='Name' fullWidth />
+                      <ErrorMessage name={`customFields[${index}].name`} />
+
+                      <Field component={TextField} name={`customFields[${index}].value`} label='Value' fullWidth />
+                      <ErrorMessage name={`customFields[${index}].value`} />
+
+                      <Field name={`customFields[${index}].viewPermission`}>
+                        {({ field, form }: any) => (
+                          <ToggleButtonGroup
+                            exclusive
+                            value={field.value}
+                            onChange={(_, newValue) => form.setFieldValue(field.name, newValue)}>
+                            <ToggleButton value={FieldPermission.all}>All Users</ToggleButton>
+                            <ToggleButton value={FieldPermission.doctor}>Doctors Only</ToggleButton>
+                          </ToggleButtonGroup>
+                        )}
+                      </Field>
+
+                      <Button variant='outlined' color='error' onClick={() => remove(index)}>
+                        Remove Field
+                      </Button>
+                    </div>
+                  ))}
+                  <Button color='primary' onClick={() => push({ name: '', value: '', viewPermission: 'doctor' })}>
+                    Add Field
                   </Button>
                 </>
               )}

@@ -13,3 +13,5 @@ export type PatientListParams = {};
 export type PatientListResponse = {
   patients: Patient[];
 };
+
+export type DeletePatientResponse = { success: boolean };
